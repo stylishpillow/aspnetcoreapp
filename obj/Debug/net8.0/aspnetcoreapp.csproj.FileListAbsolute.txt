@@ -22,6 +22,8 @@
 /Users/assessment/Projects/aspnetcoreapp/bin/Debug/net8.0/Microsoft.EntityFrameworkCore.Sqlite.dll
 /Users/assessment/Projects/aspnetcoreapp/bin/Debug/net8.0/Microsoft.Extensions.DependencyModel.dll
 /Users/assessment/Projects/aspnetcoreapp/bin/Debug/net8.0/Mono.TextTemplating.dll
+/Users/assessment/Projects/aspnetcoreapp/bin/Debug/net8.0/Otp.NET.dll
+/Users/assessment/Projects/aspnetcoreapp/bin/Debug/net8.0/QRCoder.dll
 /Users/assessment/Projects/aspnetcoreapp/bin/Debug/net8.0/SQLitePCLRaw.batteries_v2.dll
 /Users/assessment/Projects/aspnetcoreapp/bin/Debug/net8.0/SQLitePCLRaw.core.dll
 /Users/assessment/Projects/aspnetcoreapp/bin/Debug/net8.0/SQLitePCLRaw.provider.e_sqlite3.dll
@@ -112,6 +114,7 @@
 /Users/assessment/Projects/aspnetcoreapp/obj/Debug/net8.0/aspnetcoreapp.MvcApplicationPartsAssemblyInfo.cache
 /Users/assessment/Projects/aspnetcoreapp/obj/Debug/net8.0/aspnetcoreapp.RazorAssemblyInfo.cache
 /Users/assessment/Projects/aspnetcoreapp/obj/Debug/net8.0/aspnetcoreapp.RazorAssemblyInfo.cs
+/Users/assessment/Projects/aspnetcoreapp/obj/Debug/net8.0/aspnetcoreapp.sourcelink.json
 /Users/assessment/Projects/aspnetcoreapp/obj/Debug/net8.0/staticwebassets.build.json
 /Users/assessment/Projects/aspnetcoreapp/obj/Debug/net8.0/staticwebassets.development.json
 /Users/assessment/Projects/aspnetcoreapp/obj/Debug/net8.0/staticwebassets/msbuild.aspnetcoreapp.Microsoft.AspNetCore.StaticWebAssets.props

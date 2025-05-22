@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "Wftqb0aikH8=",
+  "dgSpecHash": "1y4VDgUKDNc=",
   "success": true,
   "projectFilePath": "/Users/assessment/Projects/aspnetcoreapp/aspnetcoreapp.csproj",
   "expectedPackageFiles": [
@@ -38,6 +38,8 @@
     "/Users/assessment/.nuget/packages/microsoft.extensions.options/8.0.0/microsoft.extensions.options.8.0.0.nupkg.sha512",
     "/Users/assessment/.nuget/packages/microsoft.extensions.primitives/8.0.0/microsoft.extensions.primitives.8.0.0.nupkg.sha512",
     "/Users/assessment/.nuget/packages/mono.texttemplating/2.2.1/mono.texttemplating.2.2.1.nupkg.sha512",
+    "/Users/assessment/.nuget/packages/otp.net/1.4.0/otp.net.1.4.0.nupkg.sha512",
+    "/Users/assessment/.nuget/packages/qrcoder/1.6.0/qrcoder.1.6.0.nupkg.sha512",
     "/Users/assessment/.nuget/packages/sqlitepclraw.bundle_e_sqlite3/2.1.6/sqlitepclraw.bundle_e_sqlite3.2.1.6.nupkg.sha512",
     "/Users/assessment/.nuget/packages/sqlitepclraw.core/2.1.6/sqlitepclraw.core.2.1.6.nupkg.sha512",
     "/Users/assessment/.nuget/packages/sqlitepclraw.lib.e_sqlite3/2.1.6/sqlitepclraw.lib.e_sqlite3.2.1.6.nupkg.sha512",

@@ -1,0 +1,90 @@
+@page
+@model aspnetcoreapp.Pages.Account.ProfileModel
+@{
+    ViewData["Title"] = "Profile";
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div class="container mt-5">
+    <!-- Profile Header -->
+    <div class="card mb-4">
+        <div class="card-body text-center">
+            <img src="https://placehold.co/150x150" alt="Profile Picture" class="rounded-circle mb-3" style="width: 150px; height: 150px;">
+            <h4 class="card-title">@User.Identity?.Name</h4>
+            <p class="text-muted">@User.Identity?.Name</p>
+        </div>
+    </div>
+
+    <!-- Profile Details, Settings, and 2FA -->
+    <div class="row">
+        <!-- Profile Details -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Profile Details</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Full Name:</strong> John Doe</p>
+                    <p><strong>Email:</strong> john.doe@example.com</p>
+                    <p><strong>Joined:</strong> January 1, 2023</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Settings</h5>
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="mb-3">
+                            <label for="changePassword" class="form-label">Change Password</label>
+                            <input type="password" class="form-control" id="changePassword" placeholder="Enter new password">
+                        </div>
+                        <div class="mb-3">
+                            <label for="notificationSettings" class="form-label">Notification Settings</label>
+                            <select class="form-select" id="notificationSettings">
+                                <option selected>Enable Notifications</option>
+                                <option>Disable Notifications</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Two-Factor Authentication -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5>Two-Factor Authentication (2FA)</h5>
+                </div>
+                <div class="card-body text-center">
+                    <p>Scan the QR code below with your authenticator app to enable 2FA:</p>
+                    <img src="@Model.QrCodeImageUrl" alt="QR Code" class="mb-3" style="max-width: 100%; height: auto;" />
+                    <p>Or manually enter this key into your authenticator app:</p>
+                    <code>@Model.ManualEntryKey</code>
+
+                    <form method="post" asp-page-handler="Enable2FA">
+                        <div class="mb-3">
+                            <label for="verificationCode" class="form-label">Verification Code</label>
+                            <input type="text" class="form-control" id="verificationCode" name="verificationCode" placeholder="Enter code from app" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Enable 2FA</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
