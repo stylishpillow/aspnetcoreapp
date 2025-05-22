@@ -1,0 +1,13 @@
+@page
+@model aspnetcoreapp.Pages.Account.LogoutModel
+@{
+    ViewData["Title"] = "Logout";
+}
+
+<h1>Logout</h1>
+<p>Are you sure you want to log out?</p>
+
+<form method="post">
+    <button type="submit" class="btn btn-danger">Yes, log me out</button>
+    <a asp-page="/Index" class="btn btn-secondary">No, take me back</a>
+</form>
