@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using aspnetcoreapp.Data;
 using Microsoft.AspNetCore.Identity;
 using aspnetcoreapp.Services;
+using aspnetcoreapp.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +14,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add Identity services
-builder.Services.AddDefaultIdentity<IdentityUser>()
+builder.Services.AddDefaultIdentity<ApplicationUser>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 builder.Services.ConfigureApplicationCookie(options =>

@@ -6,14 +6,16 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
+using OtpNet;
+using aspnetcoreapp.Models;
 
 namespace aspnetcoreapp.Pages.Account
 {
     public class LoginModel : PageModel
     {
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
-        public LoginModel(SignInManager<IdentityUser> signInManager)
+        public LoginModel(SignInManager<ApplicationUser> signInManager)
         {
             _signInManager = signInManager;
         }
@@ -52,6 +54,62 @@ namespace aspnetcoreapp.Pages.Account
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                 return Page();
             }
+        }
+
+        public IActionResult OnPostLogin(string username, string password, string? verificationCode)
+        {
+            // Validate username and password
+            if (IsValidUser(username, password))
+            {
+                if (IsTwoFactorEnabled(username))
+                {
+                    if (string.IsNullOrEmpty(verificationCode))
+                    {
+                        TempData["ErrorMessage"] = "Please enter your 2FA verification code.";
+                        return Page();
+                    }
+
+                    string secretKey = GetSecretKeyFromDatabase(username);
+                    var totp = new Totp(Base32Encoding.ToBytes(secretKey));
+                    if (!totp.VerifyTotp(verificationCode, out long timeStepMatched))
+                    {
+                        TempData["ErrorMessage"] = "Invalid 2FA verification code.";
+                        return Page();
+                    }
+                }
+
+                // Log the user in
+                SignInUser(username);
+                return RedirectToPage("/Index");
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Invalid username or password.";
+                return Page();
+            }
+        }
+
+        private bool IsValidUser(string username, string password)
+        {
+            // Implement user validation logic here
+            return true;
+        }
+
+        private bool IsTwoFactorEnabled(string username)
+        {
+            // Implement logic to check if 2FA is enabled for the user
+            return true;
+        }
+
+        private string GetSecretKeyFromDatabase(string username)
+        {
+            // Implement logic to retrieve the secret key from the database
+            return "SECRET_KEY";
+        }
+
+        private void SignInUser(string username)
+        {
+            // Implement logic to sign in the user
         }
     }
 }

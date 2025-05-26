@@ -1,4 +1,5 @@
 using aspnetcoreapp.Data;
+using aspnetcoreapp.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -10,10 +11,10 @@ namespace aspnetcoreapp.Pages.Account
 {
     public class RegisterModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<RegisterModel> _logger;
 
-        public RegisterModel(UserManager<IdentityUser> userManager, ILogger<RegisterModel> logger)
+        public RegisterModel(UserManager<ApplicationUser> userManager, ILogger<RegisterModel> logger)
         {
             _userManager = userManager;
             _logger = logger;
@@ -43,7 +44,7 @@ namespace aspnetcoreapp.Pages.Account
         return Page();
     }
 
-    var user = new IdentityUser
+    var user = new ApplicationUser
     {
         UserName = Input.Email,
         Email = Input.Email,
@@ -56,10 +57,8 @@ namespace aspnetcoreapp.Pages.Account
     {
         _logger.LogInformation("User created a new account with password.");
 
-        // Generate email confirmation token
         var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-        // Generate confirmation link
         var confirmationLink = Url.Page(
             "/Account/ConfirmEmail",
             pageHandler: null,
@@ -68,7 +67,6 @@ namespace aspnetcoreapp.Pages.Account
 
         _logger.LogInformation("Email confirmation link: {Link}", confirmationLink);
 
-        // Send email confirmation link
         var emailSender = HttpContext.RequestServices.GetRequiredService<aspnetcoreapp.Services.EmailSender>();
         await emailSender.SendEmailAsync(
             toEmail: Input.Email,
