@@ -68,7 +68,7 @@
                     <h5>Two-Factor Authentication (2FA)</h5>
                 </div>
                 <div class="card-body text-center">
-                    @if (Model.IsTwoFactorEnabled)
+                    @if (Model.TwoFactorEnabled)
                     {
                         <p class="text-success">Two-Factor Authentication is enabled for your account.</p>
                         <form method="post" asp-page-handler="Disable2FA">

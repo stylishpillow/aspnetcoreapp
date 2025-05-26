@@ -19,16 +19,17 @@ namespace aspnetcoreapp.Pages.Account
 
         public string? QrCodeImageUrl { get; private set; }
         public string? ManualEntryKey { get; private set; }
-        public bool IsTwoFactorEnabled { get; private set; }
+        public bool TwoFactorEnabled { get; private set; }
 
         public void OnGet()
         {
-            IsTwoFactorEnabled = CheckIfTwoFactorEnabled(User.Identity?.Name);
+            TwoFactorEnabled = _userManager.GetUserAsync(User).Result?.TwoFactorEnabled ?? false;
 
-            if (!IsTwoFactorEnabled)
+            if (!TwoFactorEnabled)
             {
                 GenerateQrCodeAndSecretKey();
             }
+
         }
 
         public IActionResult OnPostEnable2FA(string verificationCode)
@@ -63,7 +64,7 @@ namespace aspnetcoreapp.Pages.Account
             if (username == null) return false;
 
             var user = _userManager.FindByNameAsync(username).Result;
-            return user?.GetType().GetProperty("IsTwoFactorEnabled")?.GetValue(user) as bool? ?? false;
+            return user?.TwoFactorEnabled ?? false; // Ensure this directly reflects the database value
         }
 
         private void EnableTwoFactorForUser(string? username, string secretKey)
@@ -73,10 +74,10 @@ namespace aspnetcoreapp.Pages.Account
             var user = _userManager.FindByNameAsync(username).Result;
             if (user != null)
             {
-                user.TwoFactorEnabled = true; // Set the TwoFactorEnabled property
-                user.TwoFactorSecretKey = secretKey; // Set the secret key
-                var result = _userManager.UpdateAsync(user).Result;
+                user.TwoFactorEnabled = true;
+                user.TwoFactorSecretKey = secretKey;
 
+                var result = _userManager.UpdateAsync(user).Result;
                 if (!result.Succeeded)
                 {
                     throw new InvalidOperationException("Failed to update user for enabling 2FA.");
@@ -92,8 +93,13 @@ namespace aspnetcoreapp.Pages.Account
             if (user != null)
             {
                 user.TwoFactorEnabled = false;
-                 user.TwoFactorSecretKey = null;
-                _userManager.UpdateAsync(user).Wait();
+                user.TwoFactorSecretKey = null;
+
+                var result = _userManager.UpdateAsync(user).Result;
+                if (!result.Succeeded)
+                {
+                    throw new InvalidOperationException("Failed to update user for disabling 2FA.");
+                }
             }
         }
 
