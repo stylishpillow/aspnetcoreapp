@@ -79,7 +79,7 @@
                     {
                         <p>Scan the QR code below with your authenticator app to enable 2FA:</p>
                         <img src="@Model.QrCodeImageUrl" alt="QR Code" class="mb-3"
-                            style="max-width: 100%; height: auto;" />
+                             style="max-width: 100%; height: auto;" />
                         <p>Or manually enter this key into your authenticator app:</p>
                         <code>@Model.ManualEntryKey</code>
 
@@ -87,7 +87,7 @@
                             <div class="mb-3">
                                 <label for="verificationCode" class="form-label">Verification Code</label>
                                 <input type="text" class="form-control" id="verificationCode" name="verificationCode"
-                                    placeholder="Enter code from app" required>
+                                       placeholder="Enter code from app" required>
                             </div>
                             <button type="submit" class="btn btn-primary">Enable 2FA</button>
                         </form>

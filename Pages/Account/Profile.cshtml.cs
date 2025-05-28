@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using QRCoder;
-using System.Text;
 using OtpNet;
+using QRCoder;
+using System;
+using System.Text;
 using aspnetcoreapp.Models;
 
 namespace aspnetcoreapp.Pages.Account
@@ -17,113 +18,88 @@ namespace aspnetcoreapp.Pages.Account
             _userManager = userManager;
         }
 
-        public string? QrCodeImageUrl { get; private set; }
-        public string? ManualEntryKey { get; private set; }
+        public string QrCodeImageUrl { get; private set; }
+        public string ManualEntryKey { get; private set; }
         public bool TwoFactorEnabled { get; private set; }
 
         public void OnGet()
         {
-            TwoFactorEnabled = _userManager.GetUserAsync(User).Result?.TwoFactorEnabled ?? false;
+            var user = _userManager.GetUserAsync(User).Result;
+            if (user == null) throw new InvalidOperationException("User not found.");
+
+            TwoFactorEnabled = user.TwoFactorEnabled;
 
             if (!TwoFactorEnabled)
             {
-                GenerateQrCodeAndSecretKey();
+                GenerateQrCodeAndSecretKey(user);
             }
-
         }
 
-        public IActionResult OnPostEnable2FA(string verificationCode)
+        public async Task<IActionResult> OnPostEnable2FAAsync(string verificationCode)
         {
-            string secretKey = TempData["SecretKey"] as string ?? throw new InvalidOperationException("Secret key not found.");
-            var totp = new Totp(Base32Encoding.ToBytes(secretKey));
-            bool isValid = totp.VerifyTotp(verificationCode, out long timeStepMatched);
-
-            if (isValid)
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null)
             {
-                EnableTwoFactorForUser(User.Identity?.Name, secretKey);
-                TempData["SuccessMessage"] = "Two-Factor Authentication has been enabled.";
-                return RedirectToPage();
-            }
-            else
-            {
-                GenerateQrCodeAndSecretKey();
-                TempData["ErrorMessage"] = "Invalid verification code. The secret key has been reset. Please try again.";
+                ModelState.AddModelError(string.Empty, "User not found.");
                 return Page();
             }
+
+            // Debugging: Log the secret key and verification code
+            Console.WriteLine($"TwoFactorSecretKey: {user.TwoFactorSecretKey}");
+            Console.WriteLine($"VerificationCode: {verificationCode}");
+
+            var totp = new Totp(OtpNet.Base32Encoding.ToBytes(user.TwoFactorSecretKey));
+            var isValid = totp.VerifyTotp(verificationCode, out _);
+
+            if (!isValid)
+            {
+                ModelState.AddModelError(string.Empty, "Invalid verification code.");
+                return Page();
+            }
+
+            // Save the authenticator key and enable 2FA
+            await _userManager.SetAuthenticationTokenAsync(user, "Default", "AuthenticatorKey", user.TwoFactorSecretKey);
+            await _userManager.SetTwoFactorEnabledAsync(user, true);
+
+            Console.WriteLine($"2FA Enabled: {await _userManager.GetTwoFactorEnabledAsync(user)}");
+            Console.WriteLine($"Authenticator Key: {await _userManager.GetAuthenticatorKeyAsync(user)}");
+
+            TempData["SuccessMessage"] = "Two-Factor Authentication has been enabled.";
+            return RedirectToPage();
         }
 
         public IActionResult OnPostDisable2FA()
         {
-            DisableTwoFactorForUser(User.Identity?.Name);
+            var user = _userManager.GetUserAsync(User).Result;
+            if (user == null) throw new InvalidOperationException("User not found.");
+
+            user.TwoFactorEnabled = false;
+            user.TwoFactorSecretKey = null;
+            _userManager.UpdateAsync(user).Wait();
             TempData["SuccessMessage"] = "Two-Factor Authentication has been disabled.";
             return RedirectToPage();
         }
-
-        private bool CheckIfTwoFactorEnabled(string? username)
+        private void GenerateQrCodeAndSecretKey(ApplicationUser user)
         {
-            if (username == null) return false;
-
-            var user = _userManager.FindByNameAsync(username).Result;
-            return user?.TwoFactorEnabled ?? false; // Ensure this directly reflects the database value
-        }
-
-        private void EnableTwoFactorForUser(string? username, string secretKey)
-        {
-            if (username == null) throw new ArgumentNullException(nameof(username));
-
-            var user = _userManager.FindByNameAsync(username).Result;
-            if (user != null)
+            // Generate the secret key only if it doesn't already exist
+            if (string.IsNullOrEmpty(user.TwoFactorSecretKey))
             {
-                user.TwoFactorEnabled = true;
-                user.TwoFactorSecretKey = secretKey;
-
-                var result = _userManager.UpdateAsync(user).Result;
-                if (!result.Succeeded)
-                {
-                    throw new InvalidOperationException("Failed to update user for enabling 2FA.");
-                }
+                user.TwoFactorSecretKey = OtpNet.Base32Encoding.ToString(OtpNet.KeyGeneration.GenerateRandomKey(20));
+                _userManager.UpdateAsync(user).Wait(); // Save the key to the database
             }
-        }
 
-        private void DisableTwoFactorForUser(string? username)
-        {
-            if (username == null) throw new ArgumentNullException(nameof(username));
+            // Generate the QR code using the existing secret key
+            var qrCodeData = $"otpauth://totp/aspnetcoreapp:{user.Email}?secret={user.TwoFactorSecretKey}&issuer=aspnetcoreapp";
 
-            var user = _userManager.FindByNameAsync(username).Result;
-            if (user != null)
+            using (var qrGenerator = new QRCoder.QRCodeGenerator())
             {
-                user.TwoFactorEnabled = false;
-                user.TwoFactorSecretKey = null;
-
-                var result = _userManager.UpdateAsync(user).Result;
-                if (!result.Succeeded)
-                {
-                    throw new InvalidOperationException("Failed to update user for disabling 2FA.");
-                }
-            }
-        }
-
-        private void GenerateQrCodeAndSecretKey()
-        {
-            string secretKey = Base32Encoding.ToString(KeyGeneration.GenerateRandomKey(20));
-            string issuer = "aspnetcoreapp";
-            string userEmail = User.Identity?.Name ?? "user@example.com";
-
-            string qrCodeData = $"otpauth://totp/{issuer}:{userEmail}?secret={secretKey}&issuer={issuer}";
-
-            using (var qrGenerator = new QRCodeGenerator())
-            {
-                var qrCodeDataObj = qrGenerator.CreateQrCode(qrCodeData, QRCodeGenerator.ECCLevel.Q);
-                using (var qrCode = new PngByteQRCode(qrCodeDataObj))
+                var qrCodeDataObj = qrGenerator.CreateQrCode(qrCodeData, QRCoder.QRCodeGenerator.ECCLevel.Q);
+                using (var qrCode = new QRCoder.PngByteQRCode(qrCodeDataObj))
                 {
                     var qrCodeBytes = qrCode.GetGraphic(20);
                     QrCodeImageUrl = "data:image/png;base64," + Convert.ToBase64String(qrCodeBytes);
                 }
             }
-
-            ManualEntryKey = secretKey;
-
-            TempData["SecretKey"] = secretKey;
         }
     }
 }

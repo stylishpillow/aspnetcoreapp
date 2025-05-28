@@ -19,11 +19,6 @@
         <span asp-validation-for="Input.Password" class="text-danger"></span>
     </div>
     <div class="form-group">
-        <label asp-for="Input.VerificationCode"></label>
-        <input asp-for="Input.VerificationCode" class="form-control" placeholder="Enter 2FA code (if required)" />
-        <span asp-validation-for="Input.VerificationCode" class="text-danger"></span>
-    </div>
-    <div class="form-group">
         <div class="form-check">
             <input asp-for="Input.RememberMe" class="form-check-input" />
             <label asp-for="Input.RememberMe" class="form-check-label"> Remember me</label>
@@ -31,7 +26,3 @@
     </div>
     <button type="submit" class="btn btn-primary">Login</button>
 </form>
-
-@section Scripts {
-    <partial name="_ValidationScriptsPartial" />
-}
